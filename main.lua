@@ -20,7 +20,7 @@ function OnDisable()
 end
 
 function countChunks(Split, Player) 
-  Player:SendMessageSuccess( "Making statistics of blocks...")
+  LOG(PLUGIN:GetName() .. " is making statistics of blocks...")
   
   local countArray = {}
   for i=0, 1000 do
@@ -28,37 +28,41 @@ function countChunks(Split, Player)
   end
   
   local chunkCount = 0
-  local radius = 1
+  local radius = 6
   for i=-radius, radius do
     for j=-radius, radius do
       if i*i + j*j<= radius*radius then
         local X = (Player:GetChunkX() + i)
         local Z = (Player:GetChunkZ() + j)
-        Player:SendMessageSuccess( "Counting chunk of: (" .. X .. ", " .. Z .. ")" )
-        chunkCount = chunkCount +1
+        LOG(PLUGIN:GetName() .. " is counting blocks in chunk: (" .. X .. ", " .. Z .. ")")
+        
         local result = countBlocksInChunk(Player:GetWorld(), X, Z)
-        for i=0, 1000 do
-          countArray[i] = countArray[i] + result[i]
+        if (result[0] ~= 65536) then
+          chunkCount = chunkCount +1
+          for i=0, 1000 do
+            countArray[i] = countArray[i] + result[i]
+          end
         end
       end
     end
   end
   
-  Player:SendMessageSuccess( "Saving statistics of blocks...)" )
+  LOG(PLUGIN:GetName() .. "is saving statistics of blocks...)")
   saveStatistics(countArray , chunkCount)
   return true
 end
 
 function saveStatistics(blockCountArray, chunkCount)
 	local SettingsIni = cIniFile();
-	SettingsIni:ReadFile("Plugins/ChunkStatistics/ChunkStatistics.ini");  -- ignore any read errors
+  local fileName = "Plugins/ChunkStatistics/" .. os.date("%X") .. ".ini"
+	SettingsIni:ReadFile(fileName);  -- ignore any read errors
   SettingsIni:GetValueSetI("[Statistics]",   "chunk-count",  chunkCount)
   
   local total = 0
   for i=0, 1000 do
     SettingsIni:GetValueSetI("[Statistics]",   "id" .. i,  blockCountArray[i])
   end
-	SettingsIni:WriteFile("Plugins/ChunkStatistics/ChunkStatistics.ini");
+	SettingsIni:WriteFile(fileName);
 end
 
 
