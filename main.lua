@@ -28,7 +28,7 @@ function countChunks(Split, Player)
   end
   
   local chunkCount = 0
-  local radius = 6
+  local radius = 10
   for i=-radius, radius do
     for j=-radius, radius do
       if i*i + j*j<= radius*radius then
